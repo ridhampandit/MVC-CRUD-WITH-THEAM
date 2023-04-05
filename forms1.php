@@ -188,7 +188,7 @@
                     <div class="col-sm-12 col-xl-6 card-body">
                         <div class="bg-light rounded h-100 p-4">
                             <h6 class="mb-4">New Form</h6>
-                            <form method="POST" action="" enctype="multipart/form-data" id="frm">
+                            <form method="POST" action="../index.php" enctype="multipart/form-data" id="frm">
                                 <div class="mb-3">
                                 <label class="form-label" for="fname">Firstname</label>
                                     <input type="text" class="form-control" id="fname" placeholder="Firstname" name="firstname">
@@ -235,7 +235,7 @@
                                         </div>
                                 <div class="mb-3">
                                     <label class="form-label">Address</label>  
-                                    <textarea name="myCKEditor" id="myCKEditor"></textarea>
+                                    <textarea name="myCKEditor" id="myCKEditor" rows="2" cols="20"></textarea>
                                     <span class="error-message-address"></span>
                                 </div>
                                 <div class="mb-3" id="1">
@@ -290,7 +290,6 @@
 <script src="../view/js/select2.min.js"></script>
 <script>
     // just for the demos, avoids form submit
-
         $("#frm").validate({
          rules:{
              firstname:{
@@ -320,6 +319,12 @@
              "states[]":{
                 required: true
              },
+            //  myCKEditor:{
+            //     required: function() 
+            //     {
+            //         CKEDITOR.instances.myCKEditor.getdata();
+            //     }
+            //  },
              "hobbies[]":{
                 required: true,
                 minlength: 2
@@ -327,7 +332,7 @@
              image:{
                 required: true,
                 accept:"image/jpeg, image/png",
-                maxFileSize: 20971520
+                filesize: 20971520 
              }
             },
              messages: {
@@ -365,7 +370,7 @@
              image:{
                 required: "Please upload image",
                 accept: "Only JPG and PNG files are allowed",
-                maxFileSize: "The maximum file size allowed is 20 MB"
+                filesize: "File size must be less than 20 MB"
              }
         },
         errorPlacement: function(error, element) {
@@ -395,7 +400,11 @@
             }
       }
      });
-
+     // Custom validation method for file size
+  $.validator.addMethod("filesize", function(value, element, param) {
+    var fileSize = element.files[0].size;
+    return fileSize <= param;
+  }, "File size must be less than 20 MB.");
 </script>
             <script>
             $(".multiple-select").select2({});
@@ -404,11 +413,21 @@
     <script>
         CKEDITOR.replace('myCKEditor');
     </script>
-<?php
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // require_once('controller/controller.php');
-                $Controller = new Hello($db);
-                $Controller->show();
+    <script>
+  $(document).ready(function() {
+  $('#frm').submit(function() {
+    var editorData = CKEDITOR.instances['myCKEditor'].getData();
+    if (editorData == '') {
+        $(".error-message-address").html('Address is Empty');
+        $(".error-message-address").css('color','red');
+      return false;
     }
-?>
+    if (editorData.length<20) {
+        $(".error-message-address").html('Please Enter 20 Or Mor Characters');
+        $(".error-message-address").css('color','red');
+      return false;
+    }
+  });
+});
+</script>
 <?php include("footer.php"); ?>
